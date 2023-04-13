@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>My App</title>
+  </head>
+  <body>
+    <form>
+      <label for="data">Enter some data:</label><br>
+      <input type="text" id="data" name="data"><br>
+      <button type="submit" onclick="saveToDrive()">Save to Google Drive</button>
+    </form>
+
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script>
+      // Client ID and API key from the Developer Console
+      var CLIENT_ID = 887804949396;
+      var API_KEY = AIzaSyCIhb5nOQVoViy2SpIShc9sqVoJycLT0EU;
+
+      // Array of API discovery doc URLs for APIs used by the quickstart
+      var DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"];
+
+      // Authorization scopes required by the API; multiple scopes can be
+      // included, separated by spaces.
+      var SCOPES = 'https://www.googleapis.com/auth/drive.file';
+
+      // Load the API client and auth2 library
+      gapi.load('client:auth2', initClient);
+
+      function initClient() {
+        gapi.client.init({
+          apiKey: API_KEY,
+          clientId: CLIENT_ID,
+          discoveryDocs: DISCOVERY_DOCS,
+          scope: SCOPES
+        }).then(function () {
+          console.log('API client initialized');
+        }, function (error) {
+          console.log('Error initializing API client:', error);
+        });
+      }
+
+      function saveToDrive() {
+        var data = document.getElementById('data').value;
+
+        // Check if user is signed in
+        if (!gapi.auth2.getAuthInstance().isSignedIn.get()) {
+          gapi.auth2.getAuthInstance().signIn();
+        }
+
+        // Create the file
+        var fileMetadata = {
+          name: 'mydata.txt'
+        };
+        var media = {
+          mimeType: 'text/plain',
+          body: data
+        };
+        gapi.client.drive.files.create({
+          resource: fileMetadata,
+          media: media,
+          fields: 'id'
+        }).then(function (response) {
+          console.log('File ID:', response.result.id);
+          alert('Data saved to Google Drive!');
+        }, function (error) {
+          console.log('Error creating file:', error);
+        });
+      }
+    </script>
+  </body>
+</html>
